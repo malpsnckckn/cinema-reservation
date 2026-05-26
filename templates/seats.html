@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{{ url_for('showtimes', movie_id=showtime.movie_id) }}" class="btn-back">← Back to Showtimes</a>
+    <h2>Select Your Seat</h2>
+    <p>🎬 {{ showtime.movie_title }} | 🎭 {{ showtime.hall_name }} | 📅 {{ showtime.start_time }}</p>
+</div>
+
+<div class="screen">SCREEN</div>
+
+<div class="seats-legend">
+    <span class="legend-item"><span class="seat available"></span> Available</span>
+    <span class="legend-item"><span class="seat reserved"></span> Reserved</span>
+    <span class="legend-item"><span class="seat selected"></span> Selected</span>
+</div>
+
+<div class="seats-grid">
+    {% for seat in seats %}
+        {% if seat.is_reserved %}
+            <div class="seat reserved" title="{{ seat.seat_number }}">
+                {{ seat.seat_number }}
+            </div>
+        {% else %}
+            <div class="seat available" title="{{ seat.seat_number }}"
+                 onclick="selectSeat({{ seat.id }}, '{{ seat.seat_number }}')">
+                {{ seat.seat_number }}
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<div class="reservation-summary" id="reservation-summary" style="display:none;">
+    <h3>Selected Seat: <span id="selected-seat-number"></span></h3>
+    <form method="POST" action="{{ url_for('reserve') }}">
+        <input type="hidden" name="showtime_id" value="{{ showtime.id }}">
+        <input type="hidden" name="seat_id" id="selected-seat-id">
+        <button type="submit" class="btn-primary">Continue to Snacks →</button>
+    </form>
+</div>
+{% endblock %}
