@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Admin Dashboard</h2>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <h3>{{ movies | length }}</h3>
+        <p>Total Movies</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_reservations }}</h3>
+        <p>Active Reservations</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_users }}</h3>
+        <p>Registered Users</p>
+    </div>
+</div>
+
+<div class="admin-section">
+    <div class="section-header">
+        <h3>Movies</h3>
+        <a href="{{ url_for('admin_create_movie') }}" class="btn-primary">+ Add Movie</a>
+    </div>
+
+    {% if movies %}
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Genre</th>
+                <th>Duration</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movie in movies %}
+            <tr>
+                <td>{{ movie.title }}</td>
+                <td>{{ movie.genre }}</td>
+                <td>{{ movie.duration_minutes }} min</td>
+                <td class="action-buttons">
+                    <a href="{{ url_for('admin_create_showtime', movie_id=movie.id) }}"
+                       class="btn-secondary">+ Showtime</a>
+                    <a href="{{ url_for('admin_edit_movie', movie_id=movie.id) }}"
+                       class="btn-secondary">Edit</a>
+                    <a href="{{ url_for('admin_snacks') }}" class="btn-secondary">Manage Snacks</a>
+                    <form method="POST"
+                          action="{{ url_for('admin_delete_movie', movie_id=movie.id) }}"
+                          style="display:inline;">
+                        <button type="submit" class="btn-danger"
+                                onclick="return confirm('Are you sure you want to delete this movie?')">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="empty-state">No movies yet. Add your first movie!</p>
+    {% endif %}
+</div>
+{% endblock %}

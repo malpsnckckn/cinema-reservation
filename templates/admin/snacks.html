@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{{ url_for('admin_dashboard') }}" class="btn-back">← Back to Dashboard</a>
+    <h2>Manage Snacks</h2>
+</div>
+
+<div class="admin-section" style="margin-bottom: 2rem;">
+    <div class="section-header">
+        <h3>Add New Snack</h3>
+    </div>
+    <form method="POST" action="{{ url_for('admin_create_snack') }}" style="display:flex; gap:1rem; align-items:flex-end; flex-wrap:wrap;">
+        <div class="form-group" style="margin:0; flex:1; min-width:150px;">
+            <label>Name</label>
+            <input type="text" name="name" required placeholder="e.g. Popcorn">
+        </div>
+        <div class="form-group" style="margin:0; flex:1; min-width:100px;">
+            <label>Price ($)</label>
+            <input type="number" name="price" step="0.50" min="0" required placeholder="4.00">
+        </div>
+        <div class="form-group" style="margin:0; flex:1; min-width:120px;">
+            <label>Category</label>
+            <select name="category" style="width:100%; padding:0.7rem 1rem; background:#fafafa; border:1px solid #ddd; border-radius:6px; color:#1a1a1a; font-size:0.95rem;">
+                <option value="food">Food</option>
+                <option value="drink">Drink</option>
+            </select>
+        </div>
+        <button type="submit" class="btn-primary" style="margin-bottom:0;">Add Snack</button>
+    </form>
+</div>
+
+<div class="admin-section">
+    <div class="section-header">
+        <h3>Current Snacks</h3>
+    </div>
+    {% if snacks %}
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for snack in snacks %}
+            <tr>
+                <td>{{ snack.name }}</td>
+                <td>{{ snack.category | capitalize }}</td>
+                <td>${{ snack.price }}</td>
+                <td>
+                    <form method="POST" action="{{ url_for('admin_delete_snack', snack_id=snack.id) }}" style="display:inline;">
+                        <button type="submit" class="btn-danger"
+                                onclick="return confirm('Delete this snack?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="empty-state">No snacks yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
