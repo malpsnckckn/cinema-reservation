@@ -4,25 +4,48 @@ from datetime import datetime
 
 # ─── AUTH ───────────────────────────────────────────────────────
 
-def register_user(db, username, password):
+def register_user(db, username, password, security_question, security_answer):
     """Returns error message or None if successful."""
     if not username or not password:
         return 'Username and password are required.'
     if len(password) < 6:
         return 'Password must be at least 6 characters.'
+    if not security_question or not security_answer:
+        return 'Security question and answer are required.'
     existing = db.execute(
         'SELECT id FROM users WHERE username = ?', (username,)
     ).fetchone()
     if existing:
         return 'Username already exists.'
     password_hash = generate_password_hash(password)
+    security_answer_hash = generate_password_hash(security_answer.lower().strip())
     db.execute(
-        'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-        (username, password_hash)
+        '''INSERT INTO users (username, password_hash, security_question, security_answer)
+           VALUES (?, ?, ?, ?)''',
+        (username, password_hash, security_question, security_answer_hash)
     )
     db.commit()
     return None
 
+
+def reset_password(db, username, security_answer, new_password):
+    """Returns error message or None if successful."""
+    if len(new_password) < 6:
+        return 'Password must be at least 6 characters.'
+    user = db.execute(
+        'SELECT * FROM users WHERE username = ?', (username,)
+    ).fetchone()
+    if not user:
+        return 'Username not found.'
+    if not check_password_hash(user['security_answer'], security_answer.lower().strip()):
+        return 'Incorrect answer to security question.'
+    new_hash = generate_password_hash(new_password)
+    db.execute(
+        'UPDATE users SET password_hash = ? WHERE id = ?',
+        (new_hash, user['id'])
+    )
+    db.commit()
+    return None
 
 def authenticate_user(db, username, password):
     """Returns user row or None."""

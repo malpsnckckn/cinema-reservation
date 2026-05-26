@@ -24,8 +24,10 @@ def register():
     if request.method == 'POST':
         username = request.form['username'].strip()
         password = request.form['password'].strip()
+        security_question = request.form['security_question'].strip()
+        security_answer = request.form['security_answer'].strip()
         db = get_db()
-        error = bl.register_user(db, username, password)
+        error = bl.register_user(db, username, password, security_question, security_answer)
         if error:
             flash(error, 'error')
         else:
@@ -57,6 +59,45 @@ def logout():
     session.clear()
     flash('You have been logged out.', 'success')
     return redirect(url_for('login'))
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    user = None
+    if request.method == 'POST':
+        action = request.form.get('action')
+        username = request.form.get('username', '').strip()
+        db = get_db()
+
+        if action == 'find_user':
+            user_row = db.execute(
+                'SELECT username, security_question FROM users WHERE username = ?',
+                (username,)
+            ).fetchone()
+            if user_row:
+                return render_template('forgot_password.html',
+                                       username=user_row['username'],
+                                       security_question=user_row['security_question'])
+            else:
+                flash('Username not found.', 'error')
+
+        elif action == 'reset_password':
+            security_answer = request.form.get('security_answer', '').strip()
+            new_password = request.form.get('new_password', '').strip()
+            error = bl.reset_password(db, username, security_answer, new_password)
+            if error:
+                flash(error, 'error')
+                user_row = db.execute(
+                    'SELECT username, security_question FROM users WHERE username = ?',
+                    (username,)
+                ).fetchone()
+                return render_template('forgot_password.html',
+                                       username=user_row['username'],
+                                       security_question=user_row['security_question'])
+            else:
+                flash('Password reset successful! Please log in.', 'success')
+                return redirect(url_for('login'))
+
+    return render_template('forgot_password.html', username=None, security_question=None)
 
 
 # ─── USER ROUTES ────────────────────────────────────────────────
