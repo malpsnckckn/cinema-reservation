@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Add Snacks to Your Order</h2>
+    <p>Enhance your cinema experience!</p>
+</div>
+
+<form method="POST" action="{{ url_for('confirm_reservation') }}">
+    <input type="hidden" name="showtime_id" value="{{ showtime_id }}">
+    <input type="hidden" name="seat_id" value="{{ seat_id }}">
+
+    {% if snacks %}
+        <div class="snacks-section">
+            <h3>🍿 Food</h3>
+            <div class="snacks-grid">
+                {% for snack in snacks if snack.category == 'food' %}
+                <div class="snack-card">
+                    <h4>{{ snack.name }}</h4>
+                    <p class="snack-price">${{ snack.price }}</p>
+                    <div class="quantity-control">
+                        <label>Quantity:</label>
+                        <input type="number" name="snack_{{ snack.id }}"
+                               value="0" min="0" max="10">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <h3>🥤 Drinks</h3>
+            <div class="snacks-grid">
+                {% for snack in snacks if snack.category == 'drink' %}
+                <div class="snack-card">
+                    <h4>{{ snack.name }}</h4>
+                    <p class="snack-price">${{ snack.price }}</p>
+                    <div class="quantity-control">
+                        <label>Quantity:</label>
+                        <input type="number" name="snack_{{ snack.id }}"
+                               value="0" min="0" max="10">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="order-actions">
+        <button type="submit" class="btn-primary">Confirm Reservation ✓</button>
+        <a href="{{ url_for('movies') }}" class="btn-secondary">Skip Snacks</a>
+    </div>
+</form>
+{% endblock %}
