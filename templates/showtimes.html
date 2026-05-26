@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <a href="{{ url_for('movies') }}" class="btn-back">← Back to Movies</a>
+    <h2>Showtimes for {{ movie.title }}</h2>
+    <p>{{ movie.genre }} | {{ movie.duration_minutes }} min</p>
+</div>
+
+{% if showtimes %}
+    <div class="showtimes-list">
+        {% for showtime in showtimes %}
+        <div class="showtime-card">
+            <div class="showtime-info">
+                <h3>🎭 {{ showtime.hall_name }}</h3>
+                <p>📅 {{ showtime.start_time }}</p>
+                <p>💺 {{ showtime.total_seats }} seats total</p>
+            </div>
+            <div class="showtime-action">
+                <a href="{{ url_for('seats', showtime_id=showtime.id) }}" class="btn-primary">
+                    Select Seat
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>No showtimes available for this movie.</p>
+    </div>
+{% endif %}
+{% endblock %}
