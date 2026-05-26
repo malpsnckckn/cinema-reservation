@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h2>My Reservations</h2>
+</div>
+
+{% if reservations %}
+    <div class="reservations-section">
+        <h3>🟢 Active Reservations</h3>
+        {% set active = reservations | selectattr('status', 'equalto', 'active') | list %}
+        {% if active %}
+            {% for res in active %}
+            <div class="reservation-card active">
+                <div class="reservation-info">
+                    <h4>🎬 {{ res.movie_title }}</h4>
+                    <p>📅 {{ res.start_time }}</p>
+                    <p>🎭 {{ res.hall_name }}</p>
+                    <p>💺 Seat: {{ res.seat_number }}</p>
+                    <p>💰 Total: ${{ res.total_price }}</p>
+                    {% if reservation_details[res.id] %}
+                        <div class="snacks-summary">
+                            <p>🍿 Snacks:</p>
+                            <ul>
+                                {% for snack in reservation_details[res.id] %}
+                                <li>{{ snack.name }} x{{ snack.quantity }} — ${{ snack.price * snack.quantity }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="reservation-action">
+                    <form method="POST" action="{{ url_for('cancel_reservation', reservation_id=res.id) }}">
+                        <button type="submit" class="btn-danger"
+                                onclick="return confirm('Are you sure you want to cancel this reservation?')">
+                            Cancel Reservation
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">No active reservations.</p>
+        {% endif %}
+    </div>
+
+    <div class="reservations-section">
+        <h3>📋 Past Reservations</h3>
+        {% set past = reservations | rejectattr('status', 'equalto', 'active') | list %}
+        {% if past %}
+            {% for res in past %}
+            <div class="reservation-card {{ res.status }}">
+                <div class="reservation-info">
+                    <h4>🎬 {{ res.movie_title }}</h4>
+                    <p>📅 {{ res.start_time }}</p>
+                    <p>🎭 {{ res.hall_name }}</p>
+                    <p>💺 Seat: {{ res.seat_number }}</p>
+                    <p>💰 Total: ${{ res.total_price }}</p>
+                    <span class="status-badge {{ res.status }}">{{ res.status | upper }}</span>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">No past reservations.</p>
+        {% endif %}
+    </div>
+
+{% else %}
+    <div class="empty-state">
+        <p>You have no reservations yet.</p>
+        <a href="{{ url_for('movies') }}" class="btn-primary">Browse Movies</a>
+    </div>
+{% endif %}
+{% endblock %}
