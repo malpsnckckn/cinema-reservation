@@ -107,11 +107,25 @@ def delete_movie(db, movie_id):
     if active:
         return 'Cannot delete movie with active reservations.'
     
-    # First delete seats, then showtimes, then movie
     showtimes = db.execute(
         'SELECT id FROM showtimes WHERE movie_id = ?', (movie_id,)
     ).fetchall()
+    
     for showtime in showtimes:
+        seats = db.execute(
+            'SELECT id FROM seats WHERE showtime_id = ?', (showtime['id'],)
+        ).fetchall()
+        reservations = db.execute(
+            'SELECT id FROM reservations WHERE showtime_id = ?', (showtime['id'],)
+        ).fetchall()
+        for reservation in reservations:
+            db.execute(
+                'DELETE FROM reservation_snacks WHERE reservation_id = ?',
+                (reservation['id'],)
+            )
+        db.execute(
+            'DELETE FROM reservations WHERE showtime_id = ?', (showtime['id'],)
+        )
         db.execute('DELETE FROM seats WHERE showtime_id = ?', (showtime['id'],))
     
     db.execute('DELETE FROM showtimes WHERE movie_id = ?', (movie_id,))
